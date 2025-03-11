@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Symfony backend service
+  symfony:
+    build:
+      context: ./symfony-backend
+      dockerfile: Dockerfile
+    container_name: symfony_backend
+    volumes:
+      - ./symfony-backend:/var/www/html
+    ports:
+      - "8000:80"
+    depends_on:
+      - database
+    environment:
+      - DATABASE_URL=mysql://user:password@database:3306/symfony_db
+      - APP_ENV=dev
+      - APP_SECRET=some_secret_key
+    networks:
+      - app-network
+
+  # MySQL database service
+  database:
+    image: mysql:8.0
+    container_name: symfony_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: symfony_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+      
+  # Web server for GitHub Pages demo
+  webdemo:
+    image: nginx:alpine
+    container_name: github_pages_demo
+    volumes:
+      - ./docs:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
