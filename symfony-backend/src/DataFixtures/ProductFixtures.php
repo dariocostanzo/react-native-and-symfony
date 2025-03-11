@@ -13,27 +13,26 @@ class ProductFixtures extends Fixture
         $products = [
             [
                 'name' => 'Premium Smartphone',
+                'description' => 'High-end smartphone with advanced features',
                 'price' => 899.99,
-                'description' => 'High-end smartphone with advanced features and excellent camera quality.'
             ],
             [
                 'name' => 'Wireless Headphones',
+                'description' => 'Noise-cancelling headphones with exceptional sound quality',
                 'price' => 149.99,
-                'description' => 'Noise-cancelling headphones with exceptional sound quality and comfort.'
             ],
             [
                 'name' => 'Smart Watch',
+                'description' => 'Feature-rich smartwatch with health tracking capabilities',
                 'price' => 299.99,
-                'description' => 'Feature-rich smartwatch with health tracking and smartphone notifications.'
-            ]
+            ],
         ];
 
         foreach ($products as $productData) {
             $product = new Product();
             $product->setName($productData['name']);
-            $product->setPrice($productData['price']);
             $product->setDescription($productData['description']);
-            
+            $product->setPrice($productData['price']);
             $manager->persist($product);
         }
 
