@@ -20,10 +20,11 @@
       }
       h1 {
         color: #2c3e50;
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
       }
       .subtitle {
         color: #7f8c8d;
-        font-size: 1.2rem;
+        font-size: clamp(0.9rem, 3vw, 1.2rem);
       }
       .container {
         display: flex;
@@ -37,8 +38,9 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         padding: 25px;
         flex: 1;
-        min-width: 300px;
+        min-width: 280px;
         max-width: 500px;
+        width: 100%;
       }
       .endpoint {
         background-color: #f8f9fa;
@@ -63,13 +65,15 @@
         padding: 15px;
         border-radius: 4px;
         overflow-x: auto;
+        font-size: clamp(0.7rem, 2vw, 0.9rem);
       }
       code {
         font-family: "Courier New", Courier, monospace;
       }
       .phone-container {
         position: relative;
-        width: 300px;
+        width: 100%;
+        max-width: 300px;
         margin: 0 auto;
       }
       .phone-frame {
@@ -88,6 +92,51 @@
         flex-direction: column;
         height: 500px;
       }
+      
+      /* Responsive styles for different screen sizes */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+        .container {
+          flex-direction: column;
+          align-items: center;
+        }
+        .card {
+          max-width: 100%;
+        }
+        .phone-screen {
+          height: 400px;
+        }
+        .product-selector {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .product-selector button {
+          margin-top: 10px;
+          width: 100%;
+        }
+        .refresh-button {
+          width: 100%;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .phone-screen {
+          height: 350px;
+        }
+        pre {
+          font-size: 0.7rem;
+        }
+        .endpoint {
+          padding: 10px;
+        }
+        .product-selector label {
+          display: block;
+          margin-bottom: 5px;
+        }
+      }
+      
       .phone-header {
         background-color: #f8f8f8;
         padding: 15px;
@@ -126,6 +175,7 @@
         text-decoration: none;
         margin-top: 20px;
         cursor: pointer;
+        text-align: center;
       }
       footer {
         text-align: center;
@@ -170,12 +220,14 @@
         align-items: center;
         margin: 20px 0;
         gap: 10px;
+        flex-wrap: wrap;
       }
       .switch {
         position: relative;
         display: inline-block;
         width: 60px;
         height: 34px;
+        flex-shrink: 0;
       }
       .switch input {
         opacity: 0;
