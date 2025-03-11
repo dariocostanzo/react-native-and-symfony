@@ -12,20 +12,16 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['product:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['product:read'])]
     private ?string $name = null;
 
-    #[ORM\Column]
-    #[Groups(['product:read'])]
-    private ?float $price = null;
-
-    #[ORM\Column(type: 'text', nullable: true)]
-    #[Groups(['product:read'])]
+    #[ORM\Column(type: 'text')]
     private ?string $description = null;
+
+    #[ORM\Column]
+    private ?float $price = null;
 
     public function getId(): ?int
     {
@@ -40,7 +36,17 @@ class Product
     public function setName(string $name): self
     {
         $this->name = $name;
+        return $this;
+    }
 
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): self
+    {
+        $this->description = $description;
         return $this;
     }
 
@@ -52,19 +58,6 @@ class Product
     public function setPrice(float $price): self
     {
         $this->price = $price;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): self
-    {
-        $this->description = $description;
-
         return $this;
     }
 }
