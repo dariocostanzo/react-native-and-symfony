@@ -1,45 +1,43 @@
-# General
-.DS_Store
-.idea/
-.vscode/
-*.log
-*.bak
+# Dependencies
+/node_modules
+/symfony-backend/vendor
+/react-native-app/node_modules
 
-# Node.js (React Native)
-node_modules/
-npm-debug.log
-yarn-debug.log
-yarn-error.log
+# Environment files
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
-# Expo
-.expo/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
+# Build files
+/build
+/dist
+/symfony-backend/var
+/react-native-app/build
+/react-native-app/android/app/build
+/react-native-app/ios/build
 
-# Symfony
-/symfony-backend/var/
-/symfony-backend/vendor/
-/symfony-backend/.env.local
-/symfony-backend/.env.local.php
-/symfony-backend/.env.*.local
-/symfony-backend/public/bundles/
-/symfony-backend/var/
-/symfony-backend/vendor/
+# Expo files
+/react-native-app/.expo
+/react-native-app/.expo-shared
+/react-native-app/web-build
 
-# Docker
-.docker/
-docker-compose.override.yml
+# Babel cache files
+/react-native-app/.expo/web/cache/development/babel-loader
+*.json.cache
+*.babel-loader-*.json
 
-# Testing
-/coverage/
-.phpunit.result.cache
+# IDE files
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
