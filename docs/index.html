@@ -164,6 +164,56 @@
       .product-selector button:hover {
         background-color: #2980b9;
       }
+      /* Toggle Switch Styles */
+      .api-toggle {
+        display: flex;
+        align-items: center;
+        margin: 20px 0;
+        gap: 10px;
+      }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+      }
+      input:checked + .slider {
+        background-color: #2196f3;
+      }
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+      .slider.round {
+        border-radius: 34px;
+      }
+      .slider.round:before {
+        border-radius: 50%;
+      }
     </style>
   </head>
   <body>
@@ -183,6 +233,19 @@
           serve product data.
         </p>
 
+        <div class="api-toggle">
+          <label class="switch">
+            <input
+              type="checkbox"
+              id="api-source-toggle"
+              aria-label="Toggle API source"
+              title="Toggle between mock data and real API"
+            />
+            <span class="slider round"></span>
+          </label>
+          <span id="api-source-label">Using Mock Data</span>
+        </div>
+
         <h3>Get All Products</h3>
         <div class="endpoint">
           <span class="method get">GET</span>
@@ -199,9 +262,7 @@
           <label for="product-id-selector">Select a product:</label>
           <select id="product-id-selector" aria-label="Product ID selector">
             <option value="1">Product ID: 1 - Premium Smartphone</option>
-            <option value="2" selected>
-              Product ID: 2 - Wireless Headphones
-            </option>
+            <option value="2" selected>Product ID: 2 - Wireless Headphones</option>
             <option value="3">Product ID: 3 - Smart Watch</option>
           </select>
           <button onclick="fetchProductById()">Fetch</button>
@@ -249,6 +310,16 @@
     </footer>
 
     <script>
+      // Add an event listener to the API toggle switch
+      document.getElementById("api-source-toggle").addEventListener("change", function() {
+        // Update the label
+        document.getElementById("api-source-label").textContent = 
+          this.checked ? "Using Local Symfony API" : "Using Mock Data";
+        
+        // Refresh data when toggling
+        fetchData();
+      });
+      
       // Function to fetch data from the Symfony backend
       async function fetchData() {
         try {
@@ -259,69 +330,120 @@
             "Loading...";
           document.getElementById("phone-products").innerHTML =
             '<div style="text-align: center; padding: 20px;">Loading products...</div>';
-
-          // Use mock data for GitHub Pages demo
-          const productsData = [
-            {
-              id: 1,
-              name: "Premium Smartphone",
-              description: "High-end smartphone with advanced features",
-              price: 899.99,
-            },
-            {
-              id: 2,
-              name: "Wireless Headphones",
-              description:
-                "Noise-cancelling headphones with exceptional sound quality",
-              price: 149.99,
-            },
-            {
-              id: 3,
-              name: "Smart Watch",
-              description:
-                "Feature-rich smartwatch with health tracking capabilities",
-              price: 299.99,
-            },
-          ];
-
+      
+          // Check if we should use the real API or mock data
+          const useRealApi =
+            document.getElementById("api-source-toggle").checked;
+          let productsData;
+      
+          if (useRealApi) {
+            // Fetch from local Symfony backend
+            const response = await fetch("http://localhost:8000/api/products", {
+              headers: {
+                Accept: "application/json",
+              },
+            });
+            console.log(response);
+            // Check if response is JSON
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              productsData = await response.json();
+            } else {
+              // If not JSON, get the text and show it for debugging
+              const text = await response.text();
+              throw new Error(
+                `Server returned non-JSON response: ${text.substring(
+                  0,
+                  150
+                )}...`
+              );
+            }
+          } else {
+            // Use mock data
+            productsData = {
+              products: [
+                {
+                  id: 1,
+                  name: "Premium Smartphone",
+                  description: "High-end smartphone with advanced features",
+                  price: 899.99,
+                },
+                {
+                  id: 2,
+                  name: "Wireless Headphones",
+                  description:
+                    "Noise-cancelling headphones with exceptional sound quality",
+                  price: 149.99,
+                },
+                {
+                  id: 3,
+                  name: "Smart Watch",
+                  description:
+                    "Feature-rich smartwatch with health tracking capabilities",
+                  price: 299.99,
+                },
+              ],
+            };
+          }
+      
           // Display products in the code block
           document.getElementById("products-response").textContent =
             JSON.stringify(productsData, null, 2);
-
+      
           // Display products in the phone mockup
           let phoneProductsHtml = "";
-
-          productsData.forEach((product) => {
-            phoneProductsHtml += `
-                        <div class="product-item">
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-price">$${product.price.toFixed(
-                              2
-                            )}</div>
-                            <div class="product-description">${
-                              product.description
-                            }</div>
-                        </div>
-                    `;
-          });
-
-          document.getElementById("phone-products").innerHTML =
-            phoneProductsHtml ||
-            '<div style="text-align: center; padding: 20px;">No products found</div>';
-
-          // Use product ID 2 for the initial display
-          fetchProductById(2);
+      
+          // Check if productsData has the expected structure
+          const productsList = useRealApi
+            ? (productsData && productsData.products ? productsData.products : [])
+            : productsData.products;
+      
+          // Update the product selector with actual product IDs
+          if (Array.isArray(productsList) && productsList.length > 0) {
+            const productSelector = document.getElementById("product-id-selector");
+            productSelector.innerHTML = ""; // Clear existing options
+            
+            productsList.forEach((product) => {
+              const option = document.createElement("option");
+              option.value = product.id;
+              option.textContent = `Product ID: ${product.id} - ${product.name}`;
+              productSelector.appendChild(option);
+            });
+          }
+      
+          if (Array.isArray(productsList) && productsList.length > 0) {
+            productsList.forEach((product) => {
+              phoneProductsHtml += `
+                <div class="product-item">
+                  <div class="product-name">${product.name}</div>
+                  <div class="product-price">$${product.price.toFixed(2)}</div>
+                  <div class="product-description">${product.description}</div>
+                </div>
+              `;
+            });
+          } else {
+            phoneProductsHtml = '<div style="text-align: center; padding: 20px;">No products found</div>';
+          }
+      
+          document.getElementById("phone-products").innerHTML = phoneProductsHtml;
+      
+          // Use the first product ID for the initial display instead of hardcoding ID 2
+          if (Array.isArray(productsList) && productsList.length > 0) {
+            fetchProductById(productsList[0].id);
+          }
         } catch (error) {
           console.error("Error loading data:", error);
-          document.getElementById(
-            "products-response"
-          ).textContent = `Error: ${error.message}`;
-          document.getElementById(
-            "product-response"
-          ).textContent = `Error: ${error.message}`;
+          const useRealApi =
+            document.getElementById("api-source-toggle").checked;
+          const errorMsg = useRealApi
+            ? `Error: ${error.message}\nMake sure your Symfony backend is running at http://localhost:8000`
+            : `Error: ${error.message}`;
+      
+          document.getElementById("products-response").textContent = errorMsg;
+          document.getElementById("product-response").textContent = errorMsg;
           document.getElementById(
             "phone-products"
-          ).innerHTML = `<div style="text-align: center; padding: 20px; color: red;">Error: ${error.message}</div>`;
+          ).innerHTML = `<div style="text-align: center; padding: 20px; color: red;">${errorMsg}</div>`;
         }
       }
 
@@ -333,61 +455,119 @@
 
           const productId =
             forcedId || document.getElementById("product-id-selector").value;
+          const useRealApi =
+            document.getElementById("api-source-toggle").checked;
+          let productData;
 
-          // Use mock data for GitHub Pages demo
-          const productData = {
-            product: {
-              id: parseInt(productId),
-              name:
-                productId == 1
-                  ? "Premium Smartphone"
-                  : productId == 2
-                  ? "Wireless Headphones"
-                  : "Smart Watch",
-              description:
-                productId == 1
-                  ? "High-end smartphone with advanced features"
-                  : productId == 2
-                  ? "Noise-cancelling headphones with exceptional sound quality"
-                  : "Feature-rich smartwatch with health tracking capabilities",
-              price: productId == 1 ? 899.99 : productId == 2 ? 149.99 : 299.99,
-            },
-          };
+          if (useRealApi) {
+            // Fetch from local Symfony backend
+            console.log(`Fetching product with ID: ${productId}`);
+            const response = await fetch(
+              `http://localhost:8000/api/products/${productId}`,
+              {
+                headers: {
+                  Accept: "application/json",
+                },
+              }
+            );
+            
+            console.log(`Response status: ${response.status}`);
+
+            // Check if response is JSON
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.includes("application/json")) {
+              productData = await response.json();
+              
+              // Check if we got an error response
+              if (productData.error) {
+                throw new Error(`API Error: ${productData.error}`);
+              }
+            } else {
+              // If not JSON, get the text and show it for debugging
+              const text = await response.text();
+              throw new Error(
+                `Server returned non-JSON response: ${text.substring(
+                  0,
+                  150
+                )}...`
+              );
+            }
+          } else {
+            // Use mock data
+            productData = {
+              product: {
+                id: parseInt(productId),
+                name:
+                  productId == 1
+                    ? "Premium Smartphone"
+                    : productId == 2
+                    ? "Wireless Headphones"
+                    : "Smart Watch",
+                description:
+                  productId == 1
+                    ? "High-end smartphone with advanced features"
+                    : productId == 2
+                    ? "Noise-cancelling headphones with exceptional sound quality"
+                    : "Feature-rich smartwatch with health tracking capabilities",
+                price:
+                  productId == 1 ? 899.99 : productId == 2 ? 149.99 : 299.99,
+              },
+            };
+          }
 
           document.getElementById("product-response").textContent =
             JSON.stringify(productData, null, 2);
 
           // Highlight the selected product in the phone
           const productItems = document.querySelectorAll(".product-item");
-          productItems.forEach((item) => {
-            const nameElement = item.querySelector(".product-name");
-            if (
-              nameElement &&
-              productData.product &&
-              nameElement.textContent === productData.product.name
-            ) {
-              item.style.backgroundColor = "#f0f8ff";
-              item.style.borderLeft = "3px solid #3498db";
-              item.scrollIntoView({ behavior: "smooth", block: "center" });
-            } else {
-              item.style.backgroundColor = "";
-              item.style.borderLeft = "";
-            }
-          });
+          
+          // Get the product data, handling different response structures
+          const product = productData.product || productData;
+          
+          if (product) {
+            productItems.forEach((item) => {
+              const nameElement = item.querySelector(".product-name");
+              if (nameElement && nameElement.textContent === product.name) {
+                item.style.backgroundColor = "#f0f8ff";
+                item.style.borderLeft = "3px solid #3498db";
+                item.scrollIntoView({ behavior: "smooth", block: "center" });
+              } else {
+                item.style.backgroundColor = "";
+                item.style.borderLeft = "";
+              }
+            });
+          }
         } catch (error) {
           console.error("Error fetching product by ID:", error);
-          document.getElementById(
-            "product-response"
-          ).textContent = `Error: ${error.message}`;
+          const useRealApi =
+            document.getElementById("api-source-toggle").checked;
+          const errorMsg = useRealApi
+            ? `Error: ${error.message}\nMake sure your Symfony backend is running at http://localhost:8000`
+            : `Error: ${error.message}`;
+
+          document.getElementById("product-response").textContent = errorMsg;
         }
       }
 
-      // Update the onclick handler for the fetch button
+      // Update the onclick handler for the fetch button and toggle
       document.addEventListener("DOMContentLoaded", function () {
         document.querySelector(".product-selector button").onclick =
           function () {
             fetchProductById();
           };
+
+        // Set up API toggle
+        const apiToggle = document.getElementById("api-source-toggle");
+        const apiLabel = document.getElementById("api-source-label");
+
+        apiToggle.addEventListener("change", function () {
+          if (this.checked) {
+            apiLabel.textContent = "Using Local Symfony API";
+          } else {
+            apiLabel.textContent = "Using Mock Data";
+          }
+          fetchData();
+        });
 
         // Fetch data when the page loads
         fetchData();
